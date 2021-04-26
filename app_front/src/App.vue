@@ -1,22 +1,18 @@
 <template>
-  <div>
-    <app-header></app-header>
-    <app-content></app-content>
+  <div id="app">
+    <router-view />
   </div>
 </template>
 
 <script>
-import AppHeader from "/components/AppHeader";
-import AppContent from "/components/AppContent";
+import router from "./router";
 
 export default {
   name: "App",
-  components: {
-    AppHeader,
-    AppContent,
-  },
+  router,
 };
 </script>
+
 
 <style>
 </style>
