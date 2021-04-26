@@ -28,6 +28,18 @@ CREATE TABLE post_like(
     PRIMARY KEY(id_post, id_client)
 );
 
+CREATE TABLE mention(
+    id_post INT REFERENCES post(id_post),
+    username VARCHAR(32),
+    PRIMARY KEY (id_post, username)
+);
+
+CREATE TABLE hashtag(
+    id_post INT REFERENCES post(id_post),
+    tag VARCHAR(32),
+    PRIMARY KEY (id_post, tag)
+);
+
 GRANT SELECT, INSERT, UPDATE, DELETE ON ALL TABLES IN SCHEMA public TO yasmclient;
 GRANT USAGE, SELECT ON ALL SEQUENCES IN SCHEMA public TO yasmclient;
 

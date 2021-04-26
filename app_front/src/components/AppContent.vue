@@ -1,7 +1,7 @@
 <template>
   <div id="content">
     <div id="lateral-bar">
-      <h1>Settings</h1>
+      <h1>Bloc compte</h1>
       <div id="account-block">
         <!--- On affiche le forme ssi !logged -->
         <form
@@ -22,21 +22,31 @@
           <button v-on:click="logout">Deconnexion</button>
         </div>
       </div>
+      <h1>Settings</h1>
+      <div id="settings-block">
+        <ul>
+          <li v-for="(r, idx) in rules" :key="idx">
+            {{ r.title }}
+            <input type="checkbox" v-model="r.active" :checked="r.active" />
+          </li>
+        </ul>
+      </div>
     </div>
     <div id="feed">
-      <button v-on:click="get_posts">Reload</button><br />
       <input type="text" id="message-box" :disabled="!logged" />
       <button v-on:click="create_post" :disabled="!logged">
         Envoyer le post
       </button>
       <publication
-        v-for="(p, idx) in publications"
+        v-for="p in filtered_publications"
         v-bind:date-publication="p.datePublication"
         v-bind:post-content="p.postContent"
         v-bind:likes-count="p.likesCount"
         v-bind:likes-infos="p.likes"
         v-bind:post-id="p.postId"
-        v-bind:key="idx"
+        v-bind:mentions="p.mentions"
+        v-bind:hashtags="p.hashtags"
+        v-bind:key="p.postId"
       >
         <input
           type="checkbox"
@@ -61,11 +71,54 @@ export default {
     return {
       publications: [],
       u_id: -1,
+      username: "",
       logged: false,
       inputs: {
         username: "",
         password: "",
       },
+      rules: [
+        {
+          title: "@everyone",
+          active: true,
+          filtering: function (post) {
+            return post.mentions.includes("@everyone");
+          },
+          requiresLogged: false,
+        },
+        {
+          title: "@myself",
+          active: false,
+          filtering: function (post) {
+            return post.mentions.includes("@" + this.get_username);
+          }.bind(this),
+          requiresLogged: true,
+        },
+        {
+          title: "subscribed peoples",
+          active: false,
+          filtering: function (post) {
+            return post;
+          },
+          requiresLogged: true,
+        },
+        {
+          title: "@someone",
+          active: false,
+          filtering: function (post) {
+            return post;
+          },
+          requiresLogged: false,
+        },
+        {
+          title: "#something",
+          active: false,
+          filtering: function (post) {
+            return post;
+          },
+          requiresLogged: false,
+        },
+      ],
     };
   },
   methods: {
@@ -93,6 +146,8 @@ export default {
               postId: p.id_post,
               likesInfos: p.likes,
               liked: p.liked,
+              mentions: p.mentions,
+              hashtags: p.hashtags,
             });
           }
         });
@@ -104,15 +159,23 @@ export default {
       if (msg.length > 0 && !(msg.trim() === "")) {
         // On prépare l'envoie du message
         console.log("### Sending '" + msg + "'");
+        let hashtags = this.get_hashtags(msg);
+        let mentions = this.get_mentions(msg);
         const requestOptions = {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ user_id: this.u_id, message: msg }),
+          body: JSON.stringify({
+            user_id: this.u_id,
+            message: msg,
+            hashtags: hashtags,
+            mentions: mentions,
+          }),
         };
         // On l'envoie
         fetch(SEND_PUBLICATION_URL, requestOptions).then(() =>
           self.get_posts()
         );
+        document.getElementById("message-box").value = "";
       } else {
         console.log("/!\\ Cannot send empty messages");
       }
@@ -147,6 +210,7 @@ export default {
           if (logged) {
             console.log("Logged !");
             localStorage.setItem("u_id", res.u_id);
+            localStorage.setItem("username", res.username);
 
             this.$router.go();
           } else {
@@ -156,12 +220,36 @@ export default {
     },
     logout: function () {
       localStorage.removeItem("u_id");
+      localStorage.removeItem("username");
+
       this.$router.go();
+    },
+    get_hashtags: function (msg) {
+      let reg = /(#[a-zA-Z]+)/g;
+      return msg.match(reg);
+    },
+    get_mentions: function (msg) {
+      let reg = /(@[a-zA-Z]+)/g;
+      return msg.match(reg);
     },
   },
   computed: {
     get_last_post_id: function () {
       return this.publications.length > 0 ? this.publications[0].postId : 0;
+    },
+    filtered_publications: function () {
+      let filters = this.rules;
+      return this.publications.filter((p) => {
+        let respects = true;
+        for (let i in filters) {
+          if (!filters[i].active) continue;
+          if (!filters[i].filtering(p)) return false;
+        }
+        return respects;
+      });
+    },
+    get_username: function () {
+      return this.username;
     },
   },
   components: {
@@ -172,23 +260,31 @@ export default {
         "likes-count": Number,
         "likes-infos": Array,
         "post-id": Number,
+        mentions: Array,
+        hashtags: Array,
         liked: Boolean,
       },
       template:
-        "<div>#{{ postId }} // {{ postContent }} (le {{ datePublication }}). {{ likesCount }} likes.<slot></slot></div>",
+        "<div><p>#{{ postId }} // {{ postContent }} (le {{ datePublication }}). {{ likesCount }} likes.</p><slot></slot>" +
+        "</div>",
     },
   },
   created: function () {
     if (localStorage.getItem("u_id") !== null) {
       this.u_id = localStorage.u_id;
+      this.username = localStorage.username;
       this.logged = true;
     } else {
       this.u_id = -1;
+      this.username = "";
       this.logged = false;
     }
   },
   mounted: function () {
+    let self = this;
     this.get_posts();
+    // On recharge les messages tout les demi secondes
+    setInterval(() => self.get_posts(), 500);
   },
 };
 </script>
