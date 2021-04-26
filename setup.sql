@@ -28,7 +28,8 @@ CREATE TABLE post_like(
     PRIMARY KEY(id_post, id_client)
 );
 
-GRANT SELECT ON ALL TABLES IN SCHEMA public TO yasmclient;
+GRANT SELECT, INSERT, UPDATE, DELETE ON ALL TABLES IN SCHEMA public TO yasmclient;
+GRANT USAGE, SELECT ON ALL SEQUENCES IN SCHEMA public TO yasmclient;
 
 \copy client(username,password) FROM 'data/client.csv' DELIMITER ';' CSV
 
