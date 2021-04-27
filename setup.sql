@@ -12,7 +12,8 @@ CREATE USER yasmclient WITH PASSWORD 'pwd';
 CREATE TABLE client(
     id_client SERIAL PRIMARY KEY,
     username VARCHAR(32) NOT NULL UNIQUE,
-    password VARCHAR(32) NOT NULL
+    password VARCHAR(32) NOT NULL,
+    image_url VARCHAR(32) NOT NULL DEFAULT 'default_picture.png'
 );
 
 CREATE TABLE post(
@@ -40,6 +41,12 @@ CREATE TABLE hashtag(
     PRIMARY KEY (id_post, tag)
 );
 
+CREATE TABLE subscriber(
+    id_from INT REFERENCES client(id_client),
+    id_to INT REFERENCES client(id_client),
+    PRIMARY KEY (id_from, id_to)
+);
+
 GRANT SELECT, INSERT, UPDATE, DELETE ON ALL TABLES IN SCHEMA public TO yasmclient;
 GRANT USAGE, SELECT ON ALL SEQUENCES IN SCHEMA public TO yasmclient;
 
@@ -49,4 +56,8 @@ GRANT USAGE, SELECT ON ALL SEQUENCES IN SCHEMA public TO yasmclient;
 
 INSERT INTO post_like(id_post, id_client) VALUES
 (1, 1)
+;
+
+INSERT INTO subscriber(id_from, id_to) VALUES
+(1, 2)
 ;
