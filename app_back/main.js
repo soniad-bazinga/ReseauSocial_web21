@@ -11,7 +11,7 @@ app.use(cors());
 app.use(express.urlencoded({ extended: false }));
 app.use(express.json());
 
-const img_upload_path = '../app_front/src/assets/';
+const img_upload_path = '../app_front/src/assets/profil_pictures/';
 
 const { Client } = require('pg');
 const client = new Client({
@@ -139,6 +139,17 @@ app.post('/change_img', async (req, res) => {
             return res.json({ worked: true, errors: [] })
         });
     })
+})
+
+app.post('/change_username', async (req, res) => {
+    let username = req.body.username;
+    let id = req.body.u_id;
+
+    if (await (await client.query("SELECT * FROM client where username = $1", [username])).rowCount > 0)
+        return res.json({ worked: false, errors: ["Pseudo déjà utilisé"] })
+
+    await (await client.query("UPDATE client SET username = $1 WHERE id_client = $2", [username, id]))
+    return res.json({ worked: true, errors: [] })
 })
 
 app.listen(4000);

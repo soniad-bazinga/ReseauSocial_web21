@@ -17,6 +17,8 @@
 </template>
     
 <script>
+import marked from "marked";
+
 export default {
   name: "Publication",
   data: function () {
@@ -41,15 +43,17 @@ export default {
       if (!this.postContent) return "";
       let hashReg = /#\w+/gm;
       let atReg = /@\w+/gm;
-      return this.postContent
+      let hashed = this.postContent
         .replace(hashReg, "<span class = 'hashtag'>$&</span>")
         .replace(atReg, "<span class = 'at'>$&</span>");
+
+      return marked(hashed);
     },
     getImage() {
       try {
-        return require("@/assets/" + this.imageUrl);
+        return require("@/assets/profil_pictures/" + this.imageUrl);
       } catch {
-        return require("@/assets/default_picture.png");
+        return require("@/assets/profil_pictures/default_picture.png");
       }
     },
     printDate() {
@@ -101,5 +105,8 @@ export default {
   padding: 5px;
   margin: 5px;
   border: 1px solid grey;
+}
+p {
+  display: inline;
 }
 </style> 

@@ -48,6 +48,14 @@
           </template>
         </modal>
       </div>
+      <button @click="showUsernameModal">Changer son pseudo</button>
+      <modal v-show="usernameModalVisible" @close="closeUsernameModal">
+        <template v-slot:body>
+          <input v-model="inputs.new_username" type="text" />
+          <button @click="changeUsername">Envoyer</button>
+        </template>
+      </modal>
+      <br />
       <button v-on:click="logout">Deconnexion</button>
     </div>
   </div>
@@ -57,9 +65,10 @@
 const LOGIN_URL = "http://localhost:4000/login";
 const REGI_URL = "http://localhost:4000/register";
 const CHANGE_IMG_URL = "http://localhost:4000/change_img";
+const CHANGE_USER_URL = "http://localhost:4000/change_username";
 
 import Modal from "./Modal.vue";
-import alertMessage from "../assets/alertError.js";
+import alertMessage from "../assets/scripts/alertError.js";
 
 export default {
   name: "Account",
@@ -73,14 +82,17 @@ export default {
           password: "",
           password_check: "",
         },
+        new_username: "",
       },
       imgModalVisibile: false,
       registerModalVisible: false,
+      usernameModalVisible: false,
       image: null,
     };
   },
   props: {
     logged: Boolean,
+    u_id: Number,
   },
   components: {
     Modal,
@@ -110,9 +122,7 @@ export default {
             // On refresh
             this.$router.go();
           } else {
-            console.log("err");
             for (let e of res.errors) {
-              console.log(e);
               alertMessage(e, "ERROR");
             }
           }
@@ -131,18 +141,24 @@ export default {
     showRegiModal() {
       this.registerModalVisible = true;
     },
+    showUsernameModal() {
+      this.usernameModalVisible = true;
+    },
     closeImgModal() {
       this.imgModalVisibile = false;
     },
     closeRegiModal() {
       this.registerModalVisible = false;
     },
+    closeUsernameModal() {
+      this.usernameModalVisible = false;
+    },
     changeImg() {
       if (this.image) {
         this.sendImage();
         this.closeImgModal();
       } else {
-        console.log("No image :(");
+        alertMessage("Veuillez inclure une image", "ERROR");
       }
     },
     storeImg(e) {
@@ -174,6 +190,44 @@ export default {
           }
         });
     },
+    changeUsername() {
+      let user = this.inputs.new_username;
+      if (!user || user.trim() === "")
+        return alertMessage("Impossible de mettre un pseudo vide", "ERROR");
+      if (!/^[a-z0-9]+$/i.test(user))
+        return alertMessage(
+          "Veuillez n'utiliser que des caractères alphanumériques pour le pseudo",
+          "ERROR"
+        );
+      // Tous les prérequis sont validés
+      const requestOptions = {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          username: user,
+          u_id: this.u_id,
+        }),
+      };
+      // On l'envoie
+      fetch(CHANGE_USER_URL, requestOptions)
+        .then((res) => res.json())
+        .then((res) => {
+          if (res.worked) {
+            alertMessage(
+              "Changement de pseudo effectué avec succès ! Vous allez être redirigé.e dans un instant...",
+              "SUCCESS"
+            );
+
+            setTimeout(() => {
+              this.$router.go();
+            }, 2500);
+          } else {
+            for (let e of res.errors) {
+              alertMessage(e, "ERROR");
+            }
+          }
+        });
+    },
     register() {
       this.showRegiModal();
     },
@@ -182,21 +236,22 @@ export default {
       let pwd1 = this.inputs.register.password;
       let pwd2 = this.inputs.register.password_check;
       if (user.trim() === "" || pwd1.trim() === "" || pwd2.trim() === "") {
-        console.log("Un des champs est vide");
+        alertMessage("Un des champs est vide", "ERROR");
         return;
       }
       if (!/^[a-z0-9]+$/i.test(user)) {
-        console.log(
-          "Veuillez n'utiliser que des caractères alphanumériques pour le pseudo"
+        alertMessage(
+          "Veuillez n'utiliser que des caractères alphanumériques pour le pseudo",
+          "ERROR"
         );
         return;
       }
       if (pwd1.length < 6) {
-        console.log("Mot de passe trop court");
+        alertMessage("Mot de passe trop court", "ERROR");
         return;
       }
       if (pwd1 !== pwd2) {
-        console.log("Les mots de passes ne correspondent pas");
+        alertMessage("Les mots de passes ne correspondent pas", "ERROR");
         return;
       }
       // Tous les prérequis sont validés
@@ -214,7 +269,7 @@ export default {
         .then((res) => {
           if (res.worked) {
             alertMessage(
-              "Enregistrement effectué avec succès ! Vous allez être redirigé dans un instant...",
+              "Enregistrement effectué avec succès ! Vous allez être redirigé.e dans un instant...",
               "SUCCESS"
             );
 

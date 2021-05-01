@@ -6,7 +6,7 @@
     <!-- La barre laterale -->
     <div id="lateral-bar">
       <!-- Bloc "compte" (infos sur le compte) -->
-      <account :logged="logged" />
+      <account :logged="logged" :u_id="user.u_id" />
       <!-- Bloc pour les réglages -->
       <div id="settings-block">
         <h1>Settings</h1>
@@ -18,6 +18,7 @@
             :filter-function="r.filter"
             :requires-logged="r.requiresLogged"
             :key="idx"
+            v-show="r.requiresLogged ? logged : true"
           >
             <p style="display: inline-block">{{ r.title }}</p>
             <input
@@ -34,15 +35,19 @@
               :id="'chckb' + idx"
             />
           </li>
+          <p v-if="!logged">
+            Envie de plus de fonctionnalités? Connectez vous ! (ou créez vous un
+            compte, c'est gratuit)
+          </p>
         </ul>
       </div>
       <!-- Connecté : on peut envoyer un message -->
       <div id="message-block" v-if="logged">
-        <input
-          type="text"
+        <textarea
           id="message-box"
           v-model="messageBox"
           :disabled="!logged"
+          :placeholder="get_welcome_message"
         />
         <button v-on:click="create_post" :disabled="!logged">
           Envoyer le post
@@ -107,7 +112,7 @@ const SUB_URL = "http://localhost:4000/subscribe";
 
 import Publication from "./Publication.vue";
 import Account from "./Account.vue";
-import alertMessage from "../assets/alertError.js";
+import alertMessage from "../assets/scripts/alertError.js";
 
 // On export le composant actuel
 export default {
@@ -196,6 +201,12 @@ export default {
           requiresLogged: false,
         },
       },
+      welcome_messages: [
+        "Dites bonjour!",
+        "Racontez votre journée!",
+        "Quoi de neuf?",
+        "Chez journal...",
+      ],
     };
   },
   // On stock toutes les méthodes utiles
@@ -332,7 +343,7 @@ export default {
       else this.user.subscribed.push(id);
 
       for (let pub of this.publications) {
-        pub.subscribed = this.user.subscribed.includes(id);
+        pub.subscribed = this.user.subscribed.includes(pub.clientId);
       }
 
       this.$session.set("subscribed", JSON.stringify(this.user.subscribed));
@@ -375,6 +386,11 @@ export default {
         }
         return false;
       });
+    },
+    get_welcome_message() {
+      return this.welcome_messages[
+        Math.floor(Math.random() * this.welcome_messages.length)
+      ];
     },
   },
   // Stock tout les components
