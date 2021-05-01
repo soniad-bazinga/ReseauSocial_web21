@@ -319,7 +319,7 @@ export default {
         .then((res) => res.json())
         .then((res) => {
           if (res.worked) {
-            alertMessage("Abonnement réussi !", "SUCCESS");
+            alertMessage("Action effectuée avec succès !", "SUCCESS");
           } else {
             for (let e of res.errors) {
               alertMessage(e, "ERROR");
@@ -335,7 +335,7 @@ export default {
         pub.subscribed = this.user.subscribed.includes(id);
       }
 
-      localStorage.setItem("subscribed", JSON.stringify(this.user.subscribed));
+      this.$session.set("subscribed", JSON.stringify(this.user.subscribed));
     },
     answer: function (username) {
       this.messageBox = "@" + username + " ";
@@ -385,19 +385,16 @@ export default {
   },
   // Lors de la creation du component
   created: function () {
-    // Si on est connecté => on charge les infos du localStorage (mime les effets d'une session)
-    if (localStorage.getItem("u_id") !== null) {
-      this.user.u_id = localStorage.getItem("u_id");
-      this.user.username = localStorage.getItem("username");
-      this.user.subscribed = JSON.parse(localStorage.getItem("subscribed"));
+    if (!this.$session.exists()) {
+      this.$session.start();
+    }
+
+    if (this.$session.has("u_id")) {
+      this.user.u_id = this.$session.get("u_id");
+      this.user.username = this.$session.get("username");
+      this.user.subscribed = JSON.parse(this.$session.get("subscribed"));
 
       this.logged = true;
-    } else {
-      // Sinon "déconnecte"
-      this.user.u_id = -1;
-      this.user.username = "";
-
-      this.user.logged = false;
     }
   },
   // Lors du montage

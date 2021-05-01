@@ -100,9 +100,9 @@ export default {
         .then((res) => res.json())
         .then((res) => {
           if (res.worked) {
-            localStorage.setItem("u_id", res.result.u_id);
-            localStorage.setItem("username", res.result.username);
-            localStorage.setItem(
+            this.$session.set("u_id", res.result.u_id);
+            this.$session.set("username", res.result.username);
+            this.$session.set(
               "subscribed",
               JSON.stringify(res.result.subscribed)
             );
@@ -121,7 +121,7 @@ export default {
     // Pour se deconnecter
     logout: function () {
       // On vide le storage et on refresh
-      localStorage.clear();
+      this.$session.destroy();
 
       this.$router.go();
     },
@@ -151,7 +151,7 @@ export default {
       }
     },
     sendImage() {
-      let id = localStorage.getItem("u_id");
+      let id = this.$session.get("u_id");
 
       let formData = new FormData();
       formData.append("u_id", id);
