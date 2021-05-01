@@ -1,4 +1,7 @@
 const express = require('express');
+const formidable = require('formidable')
+const fs = require('fs');
+
 // Pour le CORS dans le header (autorise les requêtes via d'autre servers)
 var cors = require('cors');
 
@@ -7,6 +10,8 @@ var app = express();
 app.use(cors());
 app.use(express.urlencoded({ extended: false }));
 app.use(express.json());
+
+const img_upload_path = '../app_front/src/assets/';
 
 const { Client } = require('pg');
 const client = new Client({
@@ -42,9 +47,10 @@ app.get('/publications', async (req, res) => {
             q.rows[e].mentions.push(m.rows[i].username);
         }
         // Enfin, on regarde si l'utilisateur a liké
+        if (!q.rows[e].likes) return res.json({ worked: false, errors: ["Une erreur est survenue lors de la récuperation de ce post"] })
         q.rows[e].liked = q.rows[e].likes.some(e => e.id_client === user_id);
     }
-    res.json(q.rows);
+    return res.json({ worked: true, result: q.rows, errors: [] });
 });
 
 app.post('/send_publication', async (req, res) => {
@@ -63,7 +69,7 @@ app.post('/send_publication', async (req, res) => {
         await client.query("INSERT INTO mention(id_post, username) VALUES ($1, $2);", [id, m]);
     }
     // On retourne une réponse positive
-    res.json(true);
+    res.json({ worked: true, errors: [] });
 });
 
 app.post('/like_publication', async (req, res) => {
@@ -77,19 +83,62 @@ app.post('/like_publication', async (req, res) => {
     } else if (n > 0) {
         await client.query("DELETE FROM post_like WHERE id_client = $1 AND id_post =  $2;", [user_id, post_id]);
     } else {
-        res.json(false);
+        res.json({ worked: false, errors: ["Une erreur est survenu lors du like de ce post"] });
         return;
     }
-    res.json(true);
+    res.json({ worked: true, errors: [] });
+});
+
+app.post('/subscribe', async (req, res) => {
+    let from_id = parseInt(req.body.from_id);
+    let to_id = parseInt(req.body.to_id);
+    let subbing = req.body.subbing;
+
+    if (subbing) {
+        await client.query("INSERT INTO subscriber(id_from, id_to) VALUES ($1, $2);", [from_id, to_id]);
+    } else {
+        await client.query("DELETE FROM subscriber WHERE id_from = $1 AND id_to = $2;", [from_id, to_id]);
+    }
+
+    res.json({ worked: true, errors: [] });
 });
 
 app.post('/login', async (req, res) => {
     let username = req.body.username;
     let password = req.body.password;
+
     if (username.trim() === "" || password.trim() === "") return res.json({ logged: false });
     let e = await (await client.query("SELECT * FROM client WHERE username = $1 and password = $2", [username, password]));
-    let s = await (await client.query("SELECT * FROM subscriber WHERE id_from = $1;", [e.rows[0].id_client]));
-    res.json({ logged: e.rowCount > 0, u_id: e.rows[0].id_client, username: e.rows[0].username, subscribed: s.rows });
+    if (e.rowCount <= 0) return res.json({ worked: false, errors: ["Aucun utilisateur ne correspond aux informations que vous nous avez fournis"] })
+
+    let s = await (await client.query("SELECT id_to as id FROM subscriber WHERE id_from = $1;", [e.rows[0].id_client]));
+    return res.json({ worked: true, errors: [], result: { u_id: e.rows[0].id_client, username: e.rows[0].username, subscribed: s.rows.map((e) => e.id) } });
 });
+
+app.post('/register', async (req, res) => {
+    let username = req.body.username;
+    let password = req.body.password;
+    if (username.trim() === "" || password.trim() === "") return res.json({ worked: false, errors: ["L'un des champs est vide."] });
+    let exists = await (await client.query("SELECT * FROM client WHERE username = $1;", [username]))
+    if (exists.rowCount > 0) return res.json({ worked: false, errors: ["Pseudo déjà utilisé"] })
+    await (await client.query("INSERT INTO client(username, password) VALUES ($1, $2);", [username, password]))
+    return res.json({ worked: true, errors: [] })
+})
+
+app.post('/change_img', async (req, res) => {
+    new formidable.IncomingForm().parse(req, (err, fields, files) => {
+        if (err)
+            return res.json({ worked: false, errors: ["Une erreur est survenue lors de la récuparation des informations"] });
+        let u_id = fields.u_id;
+        let old_path = files.image.path;
+
+        let new_path = img_upload_path + u_id + '.png';
+
+        fs.rename(old_path, new_path, function (err) {
+            if (err) return res.json({ worked: false, errors: ["Une erreur est survenue lors de la sauvegarde de votre image"] });
+            return res.json({ worked: true, errors: [] })
+        });
+    })
+})
 
 app.listen(4000);

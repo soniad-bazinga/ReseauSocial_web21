@@ -12,15 +12,14 @@ CREATE USER yasmclient WITH PASSWORD 'pwd';
 CREATE TABLE client(
     id_client SERIAL PRIMARY KEY,
     username VARCHAR(32) NOT NULL UNIQUE,
-    password VARCHAR(32) NOT NULL,
-    image_url VARCHAR(32) NOT NULL DEFAULT 'default_picture.png'
+    password VARCHAR(32) NOT NULL
 );
 
 CREATE TABLE post(
     id_post SERIAL PRIMARY KEY,
     id_client INT REFERENCES client(id_client) NOT NULL,
     content TEXT NOT NULL,
-    post_date DATE DEFAULT NOW()
+    post_date TIMESTAMP DEFAULT NOW()
 );
 
 CREATE TABLE post_like(
