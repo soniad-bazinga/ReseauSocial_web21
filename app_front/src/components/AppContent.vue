@@ -229,20 +229,22 @@ export default {
           if (res.worked) {
             let pubs = res.result;
             for (let p of pubs) {
-              // Et on les push en première position
-              self.publications.unshift({
-                datePublication: new Date(p.post_date),
-                postContent: p.content,
-                likesCount: p.likes.length,
-                postId: p.id_post,
-                likesInfos: p.likes,
-                liked: p.liked,
-                clientUsername: p.username,
-                clientId: p.id_client,
-                mentions: p.mentions,
-                hashtags: p.hashtags,
-                subscribed: self.user.subscribed.includes(p.id_client),
-              });
+              // Et on les push en première position (ssi il n'existe pas déjà)
+              // (des erreurs de réseau peuvent provoquer des doublons)
+              if (!self.publications.some((e) => e.postId == p.id_post))
+                self.publications.unshift({
+                  datePublication: new Date(p.post_date),
+                  postContent: p.content,
+                  likesCount: p.likes.length,
+                  postId: p.id_post,
+                  likesInfos: p.likes,
+                  liked: p.liked,
+                  clientUsername: p.username,
+                  clientId: p.id_client,
+                  mentions: p.mentions,
+                  hashtags: p.hashtags,
+                  subscribed: self.user.subscribed.includes(p.id_client),
+                });
             }
           } else {
             for (let e of res.errors) {

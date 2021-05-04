@@ -15,4 +15,7 @@ export default {
 
 
 <style>
+body {
+  scroll-behavior: smooth;
+}
 </style>
