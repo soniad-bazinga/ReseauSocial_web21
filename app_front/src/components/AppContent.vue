@@ -1,45 +1,44 @@
 <template>
   <!-- La div pour le contenu -->
-  <div id="content">
+  <div id="content"  class="wrapper">
     <div id="alert-box"></div>
     <button id="skyrocket" v-on:click="skyrocket">Retour en haut</button>
-    <!-- La barre laterale -->
-    <div id="lateral-bar">
+    
+    <!-- La barre laterale or side bar -->
+    <nav id="sidebar">
+    <div id="lateral-bar" >
       <!-- Bloc "compte" (infos sur le compte) -->
       <account :logged="logged" :u_id="user.u_id" />
       <!-- Bloc pour les réglages -->
       <div id="settings-block">
-        <h1>Settings</h1>
+        <div class="sidebar-header">
+           <h1>Settings</h1>
+      </div>
+
         <!-- On affiche toutes les règles connues -->
-        <ul>
-          <li
-            v-for="(r, idx) in rules"
-            :title="r.title"
-            :filter-function="r.filter"
-            :requires-logged="r.requiresLogged"
-            :key="idx"
-            v-show="r.requiresLogged ? logged : true"
-          >
-            <p style="display: inline-block">{{ r.title }}</p>
-            <input
-              type="text"
-              v-if="r.isInput"
-              :placeholder="r.placeholder"
-              :id="r.id"
-              v-model="r.val"
-            />
-            <input
-              type="checkbox"
-              v-model="r.active"
-              :disabled="r.requiresLogged ? !logged : false"
-              :id="'chckb' + idx"
-            />
-          </li>
-          <p v-if="!logged">
-            Envie de plus de fonctionnalités? Connectez vous ! (ou créez vous un
-            compte, c'est gratuit)
-          </p>
-        </ul>
+        
+          <ul class="list-unstyled components">
+            <li
+                v-for= "(r, idx) in rules"
+                :title= "r.title"
+                :filter-function= "r.filter"
+                :requires-logged= "r.requiresLogged"
+                :key= "idx"
+                v-show= "r.requiresLogged ? logged : true"
+                class="active"
+            >      
+                <div class="input-group mb-3" data-toggle="buttons">
+                  <label class="btn btn-primary">{{ r.title }}
+                    <input type="checkbox"  v-model= "r.active" :disabled= "r.requiresLogged ? !logged : false" :id= "btn-check"  autocomplete="off"/>      
+                  </label>  
+                  <input type="text" class="form-control" v-if= "r.isInput" :placeholder= "r.placeholder" :id= "r.id" v-model= "r.val" />               
+                 </div>
+            </li>
+            <p v-if="!logged">
+              Envie de plus de fonctionnalités? Connectez vous ! (ou créez vous un
+              compte, c'est gratuit)
+            </p>
+          </ul>
       </div>
       <!-- Connecté : on peut envoyer un message -->
       <div id="message-block" v-if="logged">
@@ -54,10 +53,25 @@
         </button>
       </div>
     </div>
+    </nav>
     <!-- Le feed contenant les publications -->
-    <div id="feed">
+   
+    <div id="feed" class="gridCentered">
+      <nav class="navbar navbar-expand-lg navbar-light bg-light">
+                <div class="container-fluid">
+
+                    <button type="button" id="sidebarCollapse" class="btn btn-info">
+                        <i class="fas fa-align-left"></i>
+                         <span>Toggle Sidebar</span>
+                    </button>
+
+                  </div>
+      </nav>
       <!-- On affiche toutes les publications -->
       <!-- on les filtres avant en utilisant les fonctions de filtrage -->
+     
+
+       
       <publication
         v-for="p in filtered_publications"
         :post-id="p.postId"
@@ -72,7 +86,11 @@
         :hashtags="p.hashtags"
         :pub-click="pub_click"
         :key="p.postId"
+        id="publication"
+        class="grid-item"
+        style="margin-top:20px;"
       >
+      <div class="grid-sizer col-md-3"></div>
         <!-- Checkbox pour s'abonner -->
         <template v-slot:subscribe>
           <input
@@ -99,9 +117,13 @@
           </button>
         </template>
       </publication>
-    </div>
-  </div>
+       </div>
+       </div>
+      
 </template>
+
+
+
 
 <script>
 // Les liens pour faire des requêtes au back-end
@@ -205,7 +227,7 @@ export default {
         "Dites bonjour!",
         "Racontez votre journée!",
         "Quoi de neuf?",
-        "Chez journal...",
+        "Cher journal...",
       ],
     };
   },
@@ -447,6 +469,9 @@ document.addEventListener("scroll", function () {
 
   scrollPos = st <= 0 ? 0 : st;
 });
+
+
+
 </script>
 
 <style>
@@ -470,4 +495,36 @@ document.addEventListener("scroll", function () {
   margin-left: auto;
   margin-right: auto;
 }
+
+.gridCentered{
+  margin-left: auto; 
+  margin-right: auto;
+}
+
+.gridCentered .static, 
+.gridCentered .Masonry-Premount .Collection-Item{
+  position: absolute; 
+  visibility: hidden;
+}
+
+.gridCentered .Masonry-Premount, 
+.gridCentered .Masonry-Premount .AutoSizer, 
+.gridCentered .Masonry-Premount .Collection {
+  width: auto !important;
+  background: black;
+}
+
+@media (min-width: 0px) and(max-width: 755px){
+  .gridCentered{
+    width: 504px;
+  }
+  .gridCentered .Masonry-Premount .Collection-Item:nth-child(-n+2), 
+  .gridCentered .static:nth-child(-n+2){
+    position: static !important ; 
+    visibility: visible  !important;
+    float: left;
+    display: block;
+  }
+}
+
 </style>

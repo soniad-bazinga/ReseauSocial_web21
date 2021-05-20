@@ -1,20 +1,23 @@
 <template>
-  <div id="account-block">
+  <div id="account-block" class= "account">
     <h1>Bloc compte</h1>
     <!-- Non connecté : on affiche le form de connexion -->
     <div id="unregistered-block" v-if="!logged">
       <form method="post" id="login-form" @submit.prevent="login">
-        <input type="text" v-model="inputs.username" placeholder="Pseudo" />
-        <input
-          type="password"
-          v-model="inputs.password"
-          placeholder="Mot de passe"
-        />
-        <input type="submit" value="Se connecter" />
+        <div class="form-group">
+          <label for="exampleInputEmail1">Ton Blaze</label>
+          <input type="text" class="form-control" v-model="inputs.username" placeholder="Entrez votre pseudo" />
+          <small id="pseudoHelp" class="form-test text-muted">Ravi de vous revoir! </small>
+        </div> 
+        <div class="form-group">
+          <label for="exampleInputPassword1">Password</label>
+          <input type="password" class="form-control" v-model="inputs.password" placeholder="Mot de passe"/>
+        </div>
+        <button type="submit" class="btn btn-primary"> Connexion</button>
       </form>
       <p>
         Pas encore de compte?
-        <span id="register" @click="register">Cliquez ici !</span>
+        <span id="register" @click="register">Rejoignez-nous!</span>
       </p>
       <modal v-show="registerModalVisible" @close="closeRegiModal">
         <template v-slot:body>
@@ -62,6 +65,7 @@
 </template>
 
 <script>
+
 const LOGIN_URL = "http://localhost:4000/login";
 const REGI_URL = "http://localhost:4000/register";
 const CHANGE_IMG_URL = "http://localhost:4000/change_img";
@@ -69,6 +73,8 @@ const CHANGE_USER_URL = "http://localhost:4000/change_username";
 
 import Modal from "./Modal.vue";
 import alertMessage from "../assets/scripts/alertError.js";
+
+
 
 export default {
   name: "Account",
@@ -285,7 +291,10 @@ export default {
     },
   },
 };
+
 </script>
+
+
 
 <style>
 #register {

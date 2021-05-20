@@ -9,3 +9,5 @@ Vue.use(VueSession)
 new Vue({
   render: h => h(App)
 }).$mount('#app')
+
+
