@@ -97,85 +97,89 @@
 
     <div id="feed" class="gridCentered">
       <!-- Si on a aucune publication à afficher -->
-      <div style="margin-top: 75px" v-if="filtered_publications.length == 0">
-        <h3>
-          Votre feed est vide...<br />
-          Essayez de suivre du monde en cliquant sur la [
-          <i class="bi bi-bell-fill"></i> ]<br />
-          ou de jetter un oeil à <b>`@everyone`</b>!
-        </h3>
-      </div>
+      <transition name="list">
+        <div id="empty-feed" v-if="filtered_publications.length == 0">
+          <h3>
+            Votre feed est vide...<br />
+            Essayez de suivre du monde en cliquant sur la [
+            <i class="bi bi-bell-fill"></i> ]<br />
+            ou de jetter un oeil à <b>`@everyone`</b>!
+          </h3>
+        </div>
+      </transition>
 
       <!-- On affiche toutes les publications -->
       <!-- on les filtres avant en utilisant les fonctions de filtrage -->
-      <publication
-        v-for="p in filtered_publications"
-        :post-id="p.postId"
-        :client-username="p.clientUsername"
-        :client-id="p.clientId"
-        :date-publication="p.datePublication"
-        :post-content="p.postContent"
-        :likes-count="p.likesCount"
-        :likes-infos="p.likes"
-        :image-url="p.clientId + '.png'"
-        :mentions="p.mentions"
-        :hashtags="p.hashtags"
-        :pub-click="pub_click"
-        :key="p.postId"
-        id="publication"
-        class="grid-item"
-        style="margin-top: 20px"
-      >
-        <div class="grid-sizer col-md-3"></div>
-        <!-- Checkbox pour s'abonner -->
-        <template v-slot:subscribe v-if="logged && p.clientId != user.u_id">
-          <input
-            type="checkbox"
-            v-on:click="subscribe(p)"
-            v-model="p.subscribed"
-            :id="'sub-' + p.postId"
-            :disabled="!logged"
-            class="subscribed-check form-check-input btn-check"
-          />
-          <label
-            v-if="!user.subscribed.includes(p.clientId)"
-            :for="'sub-' + p.postId"
-            class="btn btn-outline-light m-1 subscribed-check"
-            ><i class="bi bi-bell-fill"></i
-          ></label>
-          <label
-            v-else
-            :for="'sub-' + p.postId"
-            class="btn btn-outline-light m-1 subscribed-check"
-            ><i class="bi bi-bell-slash-fill"></i
-          ></label>
-        </template>
-        <!-- Checkbox pour liker le post -->
-        <template v-slot:like>
-          <input
-            type="checkbox"
-            :id="'like-' + p.postId"
-            v-on:click="like_post(p)"
-            v-if="logged"
-            v-model="p.liked"
-            :disabled="!logged"
-            class="form-check-input btn-check"
-            autocomplete="off"
-          />
-          <label :for="'like-' + p.postId" class="btn btn-outline-light m-1">
-            {{ p.likesCount }} <i class="bi bi-heart-fill"></i>
-          </label>
-        </template>
-        <template v-slot:answer>
-          <button
-            class="btn btn-outline-light m-1"
-            v-if="logged"
-            @click="answer(p.clientUsername)"
-          >
-            Répondre
-          </button>
-        </template>
-      </publication>
+      <transition-group name="list">
+        <publication
+          v-for="p in filtered_publications"
+          :post-id="p.postId"
+          :client-username="p.clientUsername"
+          :client-id="p.clientId"
+          :date-publication="p.datePublication"
+          :post-content="p.postContent"
+          :likes-count="p.likesCount"
+          :likes-infos="p.likes"
+          :image-url="p.clientId + '.png'"
+          :mentions="p.mentions"
+          :hashtags="p.hashtags"
+          :pub-click="pub_click"
+          :key="p.postId"
+          :id="p.postId"
+          class="publication"
+          style="margin-top: 20px"
+        >
+          <div class="grid-sizer col-md-3"></div>
+          <!-- Checkbox pour s'abonner -->
+          <template v-slot:subscribe v-if="logged && p.clientId != user.u_id">
+            <input
+              type="checkbox"
+              v-on:click="subscribe(p)"
+              v-model="p.subscribed"
+              :id="'sub-' + p.postId"
+              :disabled="!logged"
+              class="subscribed-check form-check-input btn-check"
+            />
+            <label
+              v-if="!user.subscribed.includes(p.clientId)"
+              :for="'sub-' + p.postId"
+              class="btn btn-outline-light m-1 subscribed-check"
+              ><i class="bi bi-bell-fill"></i
+            ></label>
+            <label
+              v-else
+              :for="'sub-' + p.postId"
+              class="btn btn-outline-light m-1 subscribed-check"
+              ><i class="bi bi-bell-slash-fill"></i
+            ></label>
+          </template>
+          <!-- Checkbox pour liker le post -->
+          <template v-slot:like>
+            <input
+              type="checkbox"
+              :id="'like-' + p.postId"
+              v-on:click="like_post(p)"
+              v-if="logged"
+              v-model="p.liked"
+              :disabled="!logged"
+              class="form-check-input btn-check"
+              autocomplete="off"
+            />
+            <label :for="'like-' + p.postId" class="btn btn-outline-light m-1">
+              {{ p.likesCount }} <i class="bi bi-heart-fill"></i>
+            </label>
+          </template>
+          <template v-slot:answer>
+            <button
+              class="btn btn-outline-light m-1"
+              v-if="logged"
+              @click="answer(p.clientUsername)"
+            >
+              Répondre
+            </button>
+          </template>
+        </publication>
+      </transition-group>
     </div>
   </div>
 </template>
@@ -544,6 +548,15 @@ document.addEventListener("scroll", function () {
   transition: opacity 0.2s;
   z-index: 1000;
 }
+#feed {
+  position: relative;
+}
+#empty-feed {
+  position: absolute;
+  top: 250px;
+  left: 0;
+  right: 0;
+}
 #alert-box {
   position: fixed;
   width: 1000px;
@@ -591,6 +604,26 @@ document.addEventListener("scroll", function () {
   margin-left: auto;
   margin-right: auto;
   min-width: 50%;
+}
+.publication {
+  transition: all 0.5s;
+  width: 100%;
+  overflow: hidden;
+}
+.list-enter,
+.list-leave-to {
+  opacity: 0;
+}
+
+.list-enter {
+  transform: translateX(250px);
+}
+.list-leave-to {
+  opacity: 0;
+}
+
+.list-leave-active {
+  position: absolute;
 }
 
 @media (min-width: 0px) and(max-width: 755px) {
