@@ -1,43 +1,73 @@
 <template>
-  <div id="account-block" class= "account">
-    <h1>Bloc compte</h1>
+  <div id="account-block" class="account">
+    <div>
+      <h3>Compte</h3>
+    </div>
     <!-- Non connecté : on affiche le form de connexion -->
     <div id="unregistered-block" v-if="!logged">
       <form method="post" id="login-form" @submit.prevent="login">
-        <div class="form-group">
-          <label for="exampleInputEmail1">Ton Blaze</label>
-          <input type="text" class="form-control" v-model="inputs.username" placeholder="Entrez votre pseudo" />
-          <small id="pseudoHelp" class="form-test text-muted">Ravi de vous revoir! </small>
-        </div> 
-        <div class="form-group">
-          <label for="exampleInputPassword1">Password</label>
-          <input type="password" class="form-control" v-model="inputs.password" placeholder="Mot de passe"/>
+        <div class="mb-3 form-group">
+          <label>Ton blaze : </label>
+          <input
+            type="text"
+            class="form-control"
+            v-model="inputs.username"
+            placeholder="Entrez votre pseudo"
+          />
         </div>
-        <button type="submit" class="btn btn-primary"> Connexion</button>
+        <div class="mb-3 form-group">
+          <label>Le mot de passe :</label>
+          <input
+            type="password"
+            class="form-control"
+            v-model="inputs.password"
+            placeholder="Mot de passe"
+          />
+        </div>
+        <button type="submit" class="btn btn-primary col-12">Connexion</button>
       </form>
-      <p>
+      <p class="form-text">
         Pas encore de compte?
         <span id="register" @click="register">Rejoignez-nous!</span>
       </p>
       <modal v-show="registerModalVisible" @close="closeRegiModal">
         <template v-slot:body>
-          <label>Pseudo : </label>
-          <input v-model="inputs.register.username" type="text" /><br />
-          <label>Mot de passe (>=6) : </label>
-          <input v-model="inputs.register.password" type="password" /><br />
-          <label>Entrez le mot de passe une seconde fois : </label>
-          <input
-            v-model="inputs.register.password_check"
-            type="password"
-          /><br />
-          <button @click="checkRegi">S'inscrire</button>
+          <div class="mb-3 form-group">
+            <label>Pseudo : </label>
+            <input
+              class="form-control"
+              v-model="inputs.register.username"
+              type="text"
+            /><br />
+          </div>
+          <div class="mb-3 form-group">
+            <label>Mot de passe (>=6) : </label>
+            <input
+              class="form-control"
+              v-model="inputs.register.password"
+              type="password"
+            /><br />
+          </div>
+          <div class="mb-3 form-group">
+            <label>Entrez le mot de passe une seconde fois : </label>
+            <input
+              v-model="inputs.register.password_check"
+              type="password"
+              class="form-control"
+            /><br />
+          </div>
+          <button class="btn btn-primary col-12" @click="checkRegi">
+            S'inscrire
+          </button>
         </template>
       </modal>
     </div>
     <!-- Connecté : Bouton de deconnexion -->
     <div v-if="logged">
       <div id="profil-picture">
-        <button @click="showImgModal">Changer son avatar</button>
+        <button class="btn btn-primary col-12 mb-3" @click="showImgModal">
+          Changer son avatar
+        </button>
         <modal v-show="imgModalVisibile" @close="closeImgModal">
           <template v-slot:body>
             <input
@@ -46,26 +76,37 @@
               name="avatar"
               accept="image/png, image/jpeg"
               @change="storeImg"
+              class="form-control-file"
             />
-            <button @click="changeImg">Envoyer</button>
+            <button class="btn btn-primary" @click="changeImg">Envoyer</button>
           </template>
         </modal>
       </div>
-      <button @click="showUsernameModal">Changer son pseudo</button>
+      <button class="btn btn-primary col-12 mb-3" @click="showUsernameModal">
+        Changer son pseudo
+      </button>
       <modal v-show="usernameModalVisible" @close="closeUsernameModal">
         <template v-slot:body>
-          <input v-model="inputs.new_username" type="text" />
-          <button @click="changeUsername">Envoyer</button>
+          <label>Nouveau pseudo : </label>
+          <input
+            class="form-control"
+            v-model="inputs.new_username"
+            type="text"
+          />
+          <button class="btn btn-primary" @click="changeUsername">
+            Envoyer
+          </button>
         </template>
       </modal>
       <br />
-      <button v-on:click="logout">Deconnexion</button>
+      <button class="btn btn-primary col-12 mb-3" v-on:click="logout">
+        Deconnexion
+      </button>
     </div>
   </div>
 </template>
 
 <script>
-
 const LOGIN_URL = "http://localhost:4000/login";
 const REGI_URL = "http://localhost:4000/register";
 const CHANGE_IMG_URL = "http://localhost:4000/change_img";
@@ -73,8 +114,6 @@ const CHANGE_USER_URL = "http://localhost:4000/change_username";
 
 import Modal from "./Modal.vue";
 import alertMessage from "../assets/scripts/alertError.js";
-
-
 
 export default {
   name: "Account",
@@ -291,7 +330,6 @@ export default {
     },
   },
 };
-
 </script>
 
 

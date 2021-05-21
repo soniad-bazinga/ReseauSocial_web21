@@ -1,18 +1,24 @@
 <template>
   <div class="publication-post">
-    <img
-      :src="getImage"
-      style="width: 50px; height: 50px"
-      alt="profil picture"
-    />
-    <slot name="subscribe" />
-    <p>
-      [#{{ postId }}] <span class="at">{{ clientUsername }}</span> :
-      <span v-html="hashText"></span><br />
-      (le {{ printDate }}). {{ likesCount }} likes
-    </p>
-    <slot name="like" />
-    <slot name="answer" />
+    <div class="img-container">
+      <img :src="getImage" class="post-img" alt="profil picture" />
+    </div>
+    <div class="publication-content">
+      <slot name="subscribe" />
+      <p class="publication-text">
+        <span class="publication-header"
+          ><span class="at">@{{ clientUsername }}</span> le
+          {{ printDate }} :</span
+        >
+        <span v-html="hashText" class="publication-body"></span>
+      </p>
+      <div class="publication-footer">
+        <p>{{ likesCount }} likes &nbsp;</p>
+        <slot name="like" />
+        <br />
+        <slot name="answer" />
+      </div>
+    </div>
   </div>
 </template>
     
@@ -93,18 +99,59 @@ export default {
   font-weight: bold;
   cursor: pointer;
 }
-
 .hashtag {
-  color: rgb(67, 182, 218);
+  color: rgb(67, 182, 218) !important;
 }
 
 .at {
-  color: violet;
+  color: violet !important;
 }
 .publication-post {
+  position: relative;
+  padding: 10px;
+  z-index: -1;
+  box-shadow: 10px 10px 0px 3px rgb(124, 149, 196);
+  margin-bottom: 30px;
+}
+.img-container {
+  position: absolute;
+  z-index: 1;
+  width: 100%;
+  height: 100%;
+  left: 0;
+  right: 0;
+  top: 0;
+  bottom: 0;
+  overflow: hidden;
+}
+.post-img {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  bottom: 0;
+}
+.publication-content {
+  position: relative;
+  z-index: 2;
+}
+.publication-body {
+  display: block;
+}
+.publication-content {
+  display: block;
+  width: 100%;
+  background-color: black;
+  opacity: 80%;
   padding: 5px;
-  margin: 5px;
-  border: 1px solid grey;
+}
+.subscribed-check {
+  position: absolute;
+  right: 5px;
+  top: 5px;
+}
+.publication-text * {
+  color: white;
 }
 p {
   display: inline;

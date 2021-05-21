@@ -1,7 +1,7 @@
 <template>
   <div class="modal-bg">
     <div class="modal-content">
-      <button @click="close">X</button><br />
+      <button class="btn btn-primary" @click="close">X</button><br />
       <slot name="header"></slot>
       <slot name="body"></slot>
       <slot name="footer"></slot>
@@ -33,5 +33,13 @@ export default {
   display: flex;
   justify-content: center;
   align-items: center;
+}
+.modal-bg,
+.modal-bg * {
+  z-index: 10000;
+}
+.modal-content {
+  width: 500px;
+  color: black;
 }
 </style>

@@ -1,77 +1,97 @@
 <template>
   <!-- La div pour le contenu -->
-  <div id="content"  class="wrapper">
+  <div id="content" class="wrapper">
     <div id="alert-box"></div>
     <button id="skyrocket" v-on:click="skyrocket">Retour en haut</button>
-    
-    <!-- La barre laterale or side bar -->
-    <nav id="sidebar">
-    <div id="lateral-bar" >
-      <!-- Bloc "compte" (infos sur le compte) -->
-      <account :logged="logged" :u_id="user.u_id" />
-      <!-- Bloc pour les réglages -->
-      <div id="settings-block">
-        <div class="sidebar-header">
-           <h1>Settings</h1>
-      </div>
 
-        <!-- On affiche toutes les règles connues -->
-        
-          <ul class="list-unstyled components">
-            <li
-                v-for= "(r, idx) in rules"
-                :title= "r.title"
-                :filter-function= "r.filter"
-                :requires-logged= "r.requiresLogged"
-                :key= "idx"
-                v-show= "r.requiresLogged ? logged : true"
+    <!-- La barre laterale or side bar -->
+    <nav id="sidebar" class="shadow text-white">
+      <div id="lateral-bar">
+        <div id="lateral-bar-content">
+          <!-- Bloc "compte" (infos sur le compte) -->
+          <account :logged="logged" :u_id="user.u_id" />
+          <!-- Bloc pour les réglages -->
+          <hr />
+          <div id="settings-block">
+            <div>
+              <h3>Filtres</h3>
+            </div>
+
+            <!-- On affiche toutes les règles connues -->
+
+            <ul class="list-unstyled components">
+              <li
+                v-for="(r, idx) in rules"
+                :title="r.title"
+                :filter-function="r.filter"
+                :requires-logged="r.requiresLogged"
+                :key="idx"
+                v-show="r.requiresLogged ? logged : true"
                 class="active"
-            >      
+              >
                 <div class="input-group mb-3" data-toggle="buttons">
-                  <label class="btn btn-primary">{{ r.title }}
-                    <input type="checkbox"  v-model= "r.active" :disabled= "r.requiresLogged ? !logged : false" :id= "btn-check"  autocomplete="off"/>      
-                  </label>  
-                  <input type="text" class="form-control" v-if= "r.isInput" :placeholder= "r.placeholder" :id= "r.id" v-model= "r.val" />               
-                 </div>
-            </li>
-            <p v-if="!logged">
-              Envie de plus de fonctionnalités? Connectez vous ! (ou créez vous un
-              compte, c'est gratuit)
-            </p>
-          </ul>
+                  <label class="btn btn-primary col-12"
+                    >{{ r.title }}
+                    <input
+                      type="checkbox"
+                      v-model="r.active"
+                      :disabled="r.requiresLogged ? !logged : false"
+                      autocomplete="off"
+                    />
+                  </label>
+                  <input
+                    type="text"
+                    class="form-control"
+                    v-if="r.isInput"
+                    :placeholder="r.placeholder"
+                    :id="r.id"
+                    v-model="r.val"
+                  />
+                </div>
+              </li>
+              <p class="form-text" v-if="!logged">
+                Envie de plus de fonctionnalités? Connectez vous ! (ou créez
+                vous un compte, c'est gratuit)
+              </p>
+            </ul>
+          </div>
+          <!-- Connecté : on peut envoyer un message -->
+          <div id="message-block" v-if="logged">
+            <hr />
+            <div>
+              <h3>Poste</h3>
+            </div>
+            <textarea
+              class="form-control mb-3"
+              id="message-box"
+              v-model="messageBox"
+              :disabled="!logged"
+              :placeholder="get_welcome_message"
+            />
+            <button
+              class="btn btn-primary col-12"
+              v-on:click="create_post"
+              :disabled="!logged"
+            >
+              Envoyer le post
+            </button>
+          </div>
+        </div>
+        <nav id="expendable" class="navbar navbar-expand-lg navbar-light">
+          <div class="container-fluid">
+            <button type="button" id="sidebarCollapse">
+              <span>></span>
+            </button>
+          </div>
+        </nav>
       </div>
-      <!-- Connecté : on peut envoyer un message -->
-      <div id="message-block" v-if="logged">
-        <textarea
-          id="message-box"
-          v-model="messageBox"
-          :disabled="!logged"
-          :placeholder="get_welcome_message"
-        />
-        <button v-on:click="create_post" :disabled="!logged">
-          Envoyer le post
-        </button>
-      </div>
-    </div>
     </nav>
     <!-- Le feed contenant les publications -->
-   
+
     <div id="feed" class="gridCentered">
-      <nav class="navbar navbar-expand-lg navbar-light bg-light">
-                <div class="container-fluid">
-
-                    <button type="button" id="sidebarCollapse" class="btn btn-info">
-                        <i class="fas fa-align-left"></i>
-                         <span>Toggle Sidebar</span>
-                    </button>
-
-                  </div>
-      </nav>
       <!-- On affiche toutes les publications -->
       <!-- on les filtres avant en utilisant les fonctions de filtrage -->
-     
 
-       
       <publication
         v-for="p in filtered_publications"
         :post-id="p.postId"
@@ -88,9 +108,9 @@
         :key="p.postId"
         id="publication"
         class="grid-item"
-        style="margin-top:20px;"
+        style="margin-top: 20px"
       >
-      <div class="grid-sizer col-md-3"></div>
+        <div class="grid-sizer col-md-3"></div>
         <!-- Checkbox pour s'abonner -->
         <template v-slot:subscribe>
           <input
@@ -99,6 +119,7 @@
             v-model="p.subscribed"
             v-if="logged && p.clientId != user.u_id"
             :disabled="!logged"
+            class="subscribed-check form-check-input"
           />
         </template>
         <!-- Checkbox pour liker le post -->
@@ -109,17 +130,21 @@
             v-if="logged"
             v-model="p.liked"
             :disabled="!logged"
+            class="form-check-input"
           />
         </template>
         <template v-slot:answer>
-          <button v-if="logged" @click="answer(p.clientUsername)">
+          <button
+            class="btn btn-outline-light"
+            v-if="logged"
+            @click="answer(p.clientUsername)"
+          >
             Répondre
           </button>
         </template>
       </publication>
-       </div>
-       </div>
-      
+    </div>
+  </div>
 </template>
 
 
@@ -184,7 +209,7 @@ export default {
           active: false,
           isInput: false,
           filtering: function (post) {
-            return post.mentions.includes("@" + this.get_username);
+            return post.mentions.includes("@" + this.user.username);
           }.bind(this),
           requiresLogged: true,
         },
@@ -204,7 +229,7 @@ export default {
           isInput: true,
           val: "",
           filtering: function (post) {
-            if (this.val.trim() === "") return true;
+            if (this.val.trim() === "") return false;
             return post.clientUsername === this.val;
           },
           requiresLogged: false,
@@ -217,7 +242,7 @@ export default {
           val: "",
           id: "hashInput",
           filtering: function (post) {
-            if (this.val.trim() === "") return true;
+            if (this.val.trim() === "") return false;
             return post.hashtags.includes("#" + this.val);
           },
           requiresLogged: false,
@@ -251,20 +276,22 @@ export default {
           if (res.worked) {
             let pubs = res.result;
             for (let p of pubs) {
-              // Et on les push en première position
-              self.publications.unshift({
-                datePublication: new Date(p.post_date),
-                postContent: p.content,
-                likesCount: p.likes.length,
-                postId: p.id_post,
-                likesInfos: p.likes,
-                liked: p.liked,
-                clientUsername: p.username,
-                clientId: p.id_client,
-                mentions: p.mentions,
-                hashtags: p.hashtags,
-                subscribed: self.user.subscribed.includes(p.id_client),
-              });
+              // Et on les push en première position (ssi il n'existe pas déjà)
+              // (des erreurs de réseau peuvent provoquer des doublons)
+              if (!self.publications.some((e) => e.postId == p.id_post))
+                self.publications.unshift({
+                  datePublication: new Date(p.post_date),
+                  postContent: p.content,
+                  likesCount: p.likes.length,
+                  postId: p.id_post,
+                  likesInfos: p.likes,
+                  liked: p.liked,
+                  clientUsername: p.username,
+                  clientId: p.id_client,
+                  mentions: p.mentions,
+                  hashtags: p.hashtags,
+                  subscribed: self.user.subscribed.includes(p.id_client),
+                });
             }
           } else {
             for (let e of res.errors) {
@@ -452,33 +479,29 @@ export default {
   },
 };
 
-var scrollPos = 0;
-
 document.addEventListener("scroll", function () {
   var skyrocket = document.getElementById("skyrocket");
 
   var st = window.pageYOffset || document.documentElement.scrollTop; // Credits: "https://github.com/qeremy/so/blob/master/so.dom.js#L426"
 
   // Quand on scroll en bas
-  if (st > scrollPos || st == 0) {
+  if (st == 0) {
     skyrocket.style.opacity = 0;
   } else {
     // En haut
     skyrocket.style.opacity = 1;
   }
-
-  scrollPos = st <= 0 ? 0 : st;
 });
-
-
-
 </script>
 
 <style>
 #skyrocket {
   position: fixed;
+  bottom: 0;
+  right: 0;
   opacity: 0;
   transition: opacity 0.2s;
+  z-index: 1000;
 }
 #alert-box {
   position: fixed;
@@ -488,6 +511,30 @@ document.addEventListener("scroll", function () {
   text-align: center;
   z-index: 10;
 }
+#lateral-bar {
+  position: fixed;
+  height: 100vh;
+  width: 250px;
+}
+#lateral-bar-content {
+  overflow-y: scroll;
+  height: 100vh;
+  padding: 10px;
+  width: 250px;
+}
+#expendable {
+  z-index: 100;
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 250px;
+}
+#sidebarCollapse {
+  border: none;
+  background-color: transparent;
+  color: black;
+  font-size: 35px;
+}
 .alert-msg {
   width: fit-content;
   /* To adjust the height as well */
@@ -496,35 +543,15 @@ document.addEventListener("scroll", function () {
   margin-right: auto;
 }
 
-.gridCentered{
-  margin-left: auto; 
+.gridCentered {
+  margin-left: auto;
   margin-right: auto;
+  min-width: 50%;
 }
 
-.gridCentered .static, 
-.gridCentered .Masonry-Premount .Collection-Item{
-  position: absolute; 
-  visibility: hidden;
-}
-
-.gridCentered .Masonry-Premount, 
-.gridCentered .Masonry-Premount .AutoSizer, 
-.gridCentered .Masonry-Premount .Collection {
-  width: auto !important;
-  background: black;
-}
-
-@media (min-width: 0px) and(max-width: 755px){
-  .gridCentered{
+@media (min-width: 0px) and(max-width: 755px) {
+  .gridCentered {
     width: 504px;
   }
-  .gridCentered .Masonry-Premount .Collection-Item:nth-child(-n+2), 
-  .gridCentered .static:nth-child(-n+2){
-    position: static !important ; 
-    visibility: visible  !important;
-    float: left;
-    display: block;
-  }
 }
-
 </style>
