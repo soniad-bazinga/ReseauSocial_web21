@@ -109,7 +109,7 @@ export default {
 .publication-post {
   position: relative;
   padding: 10px;
-  z-index: -1;
+  z-index: 0;
   box-shadow: 10px 10px 0px 3px rgb(124, 149, 196);
   margin-bottom: 30px;
 }
