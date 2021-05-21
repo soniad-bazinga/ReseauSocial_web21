@@ -7,15 +7,12 @@
       <slot name="subscribe" />
       <p class="publication-text">
         <span class="publication-header"
-          ><span class="at">@{{ clientUsername }}</span> le
-          {{ printDate }} :</span
-        >
-        <span v-html="hashText" class="publication-body"></span>
+          ><span class="at">@{{ clientUsername }}</span> le {{ printDate }}
+        </span>
+        <span v-html="hashText" class="publication-body mb-2"></span>
       </p>
       <div class="publication-footer">
-        <p>{{ likesCount }} likes &nbsp;</p>
         <slot name="like" />
-        <br />
         <slot name="answer" />
       </div>
     </div>
@@ -52,8 +49,7 @@ export default {
       let hashed = this.postContent
         .replace(hashReg, "<span class = 'hashtag'>$&</span>")
         .replace(atReg, "<span class = 'at'>$&</span>");
-
-      return marked(hashed);
+      return marked("<span>“</span>" + hashed + "<span>”</span>");
     },
     getImage() {
       try {

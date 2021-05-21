@@ -24,15 +24,17 @@
             placeholder="Mot de passe"
           />
         </div>
-        <button type="submit" class="btn btn-primary col-12">Connexion</button>
+        <button type="submit" class="btn btn-outline-light col-12">
+          Connexion
+        </button>
       </form>
-      <p class="form-text">
+      <p id="register-advert" class="form-text">
         Pas encore de compte?
         <span id="register" @click="register">Rejoignez-nous!</span>
       </p>
       <modal v-show="registerModalVisible" @close="closeRegiModal">
         <template v-slot:body>
-          <div class="mb-3 form-group">
+          <div class="mb-2 form-group">
             <label>Pseudo : </label>
             <input
               class="form-control"
@@ -40,15 +42,15 @@
               type="text"
             /><br />
           </div>
-          <div class="mb-3 form-group">
-            <label>Mot de passe (>=6) : </label>
+          <div class="mb-2 form-group">
+            <label>Mot de passe <i>(plus de 6 caractères)</i> : </label>
             <input
               class="form-control"
               v-model="inputs.register.password"
               type="password"
             /><br />
           </div>
-          <div class="mb-3 form-group">
+          <div class="mb-2 form-group">
             <label>Entrez le mot de passe une seconde fois : </label>
             <input
               v-model="inputs.register.password_check"
@@ -56,7 +58,7 @@
               class="form-control"
             /><br />
           </div>
-          <button class="btn btn-primary col-12" @click="checkRegi">
+          <button class="btn btn-outline-light col-12" @click="checkRegi">
             S'inscrire
           </button>
         </template>
@@ -65,7 +67,7 @@
     <!-- Connecté : Bouton de deconnexion -->
     <div v-if="logged">
       <div id="profil-picture">
-        <button class="btn btn-primary col-12 mb-3" @click="showImgModal">
+        <button class="btn btn-outline-light col-12 mb-3" @click="showImgModal">
           Changer son avatar
         </button>
         <modal v-show="imgModalVisibile" @close="closeImgModal">
@@ -76,30 +78,36 @@
               name="avatar"
               accept="image/png, image/jpeg"
               @change="storeImg"
-              class="form-control-file"
+              class="form-control-file mb-3"
             />
-            <button class="btn btn-primary" @click="changeImg">Envoyer</button>
+            <button class="btn btn-outline-light" @click="changeImg">
+              Envoyer
+            </button>
           </template>
         </modal>
       </div>
-      <button class="btn btn-primary col-12 mb-3" @click="showUsernameModal">
+      <button
+        class="btn btn-outline-light col-12 mb-3"
+        @click="showUsernameModal"
+      >
         Changer son pseudo
       </button>
       <modal v-show="usernameModalVisible" @close="closeUsernameModal">
         <template v-slot:body>
           <label>Nouveau pseudo : </label>
           <input
-            class="form-control"
+            class="form-control mb-3"
             v-model="inputs.new_username"
             type="text"
+            placeholder="monsuperpeusdo63"
           />
-          <button class="btn btn-primary" @click="changeUsername">
+          <button class="btn btn-outline-light col-12" @click="changeUsername">
             Envoyer
           </button>
         </template>
       </modal>
       <br />
-      <button class="btn btn-primary col-12 mb-3" v-on:click="logout">
+      <button class="btn btn-outline-light col-12 mb-3" v-on:click="logout">
         Deconnexion
       </button>
     </div>
@@ -171,6 +179,9 @@ export default {
               alertMessage(e, "ERROR");
             }
           }
+        })
+        .catch(function (error) {
+          console.log(error);
         });
     },
     // Pour se deconnecter
@@ -233,6 +244,9 @@ export default {
               alertMessage(e, "ERROR");
             }
           }
+        })
+        .catch(function (error) {
+          console.log(error);
         });
     },
     changeUsername() {
@@ -271,6 +285,9 @@ export default {
               alertMessage(e, "ERROR");
             }
           }
+        })
+        .catch(function (error) {
+          console.log(error);
         });
     },
     register() {
@@ -326,6 +343,9 @@ export default {
               alertMessage(e, "ERROR");
             }
           }
+        })
+        .catch(function (error) {
+          console.log(error);
         });
     },
   },
@@ -337,7 +357,10 @@ export default {
 <style>
 #register {
   text-decoration: underline;
-  color: rgb(40, 75, 97);
+  color: rgb(201, 201, 201);
   cursor: pointer;
+}
+#register-advert {
+  color: white;
 }
 </style>

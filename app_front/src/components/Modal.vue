@@ -1,7 +1,7 @@
 <template>
   <div class="modal-bg">
     <div class="modal-content">
-      <button class="btn btn-primary" @click="close">X</button><br />
+      <button id="close-btn" @click="close">X</button><br />
       <slot name="header"></slot>
       <slot name="body"></slot>
       <slot name="footer"></slot>
@@ -39,7 +39,17 @@ export default {
   z-index: 10000;
 }
 .modal-content {
-  width: 500px;
-  color: black;
+  width: auto;
+  padding: 20px;
+  box-shadow: 0px 0px 10px 0px rgba(0, 0, 0, 0.3);
+  color: white;
+  background-color: #2e3957;
+}
+#close-btn {
+  border: none;
+  text-align: left;
+  background-color: transparent;
+  color: white;
+  margin-bottom: 10px;
 }
 </style>

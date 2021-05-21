@@ -28,18 +28,6 @@ CREATE TABLE post_like(
     PRIMARY KEY(id_post, id_client)
 );
 
-CREATE TABLE mention(
-    id_post INT REFERENCES post(id_post),
-    username VARCHAR(32),
-    PRIMARY KEY (id_post, username)
-);
-
-CREATE TABLE hashtag(
-    id_post INT REFERENCES post(id_post),
-    tag VARCHAR(32),
-    PRIMARY KEY (id_post, tag)
-);
-
 CREATE TABLE subscriber(
     id_from INT REFERENCES client(id_client),
     id_to INT REFERENCES client(id_client),
@@ -53,10 +41,6 @@ GRANT USAGE, SELECT ON ALL SEQUENCES IN SCHEMA public TO yasmclient;
 
 \copy post(id_client, content) FROM 'data/post.csv' DELIMITER ';' CSV
 
-INSERT INTO post_like(id_post, id_client) VALUES
-(1, 1)
-;
+\copy post_like(id_client, id_post) FROM 'data/post_like.csv' DELIMITER ';' CSV
 
-INSERT INTO subscriber(id_from, id_to) VALUES
-(1, 2)
-;
+\copy subscriber(id_from, id_to) FROM 'data/abonnements.csv' DELIMITER ';' CSV

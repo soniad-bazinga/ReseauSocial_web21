@@ -19,7 +19,7 @@ export default {
 
 body {
   font-family: "Poppins", sans-serif;
-  background: #fafafa;
+  background: whitesmoke;
   scroll-behavior: smooth;
 }
 

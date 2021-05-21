@@ -2,7 +2,9 @@
   <!-- La div pour le contenu -->
   <div id="content" class="wrapper">
     <div id="alert-box"></div>
-    <button id="skyrocket" v-on:click="skyrocket">Retour en haut</button>
+    <button id="skyrocket" v-on:click="skyrocket" class="btn btn-outline-dark">
+      Retour en haut
+    </button>
 
     <!-- La barre laterale or side bar -->
     <nav id="sidebar" class="shadow text-white">
@@ -30,14 +32,19 @@
                 class="active"
               >
                 <div class="input-group mb-3" data-toggle="buttons">
-                  <label class="btn btn-primary col-12"
+                  <input
+                    type="checkbox"
+                    v-model="r.active"
+                    :disabled="r.requiresLogged ? !logged : false"
+                    autocomplete="off"
+                    class="btn-check"
+                    :id="'rule-' + r.title"
+                  />
+                  <label
+                    :for="'rule-' + r.title"
+                    class="btn btn-outline-light col-12"
+                    autocomplete="off"
                     >{{ r.title }}
-                    <input
-                      type="checkbox"
-                      v-model="r.active"
-                      :disabled="r.requiresLogged ? !logged : false"
-                      autocomplete="off"
-                    />
                   </label>
                   <input
                     type="text"
@@ -50,8 +57,8 @@
                 </div>
               </li>
               <p class="form-text" v-if="!logged">
-                Envie de plus de fonctionnalités? Connectez vous ! (ou créez
-                vous un compte, c'est gratuit)
+                Envie de plus de fonctionnalités? <b>Connectez vous !</b
+                ><i> (ou créez vous un compte, c'est gratuit)</i>
               </p>
             </ul>
           </div>
@@ -69,7 +76,7 @@
               :placeholder="get_welcome_message"
             />
             <button
-              class="btn btn-primary col-12"
+              class="btn btn-outline-light col-12"
               v-on:click="create_post"
               :disabled="!logged"
             >
@@ -89,9 +96,18 @@
     <!-- Le feed contenant les publications -->
 
     <div id="feed" class="gridCentered">
+      <!-- Si on a aucune publication à afficher -->
+      <div style="margin-top: 75px" v-if="filtered_publications.length == 0">
+        <h3>
+          Votre feed est vide...<br />
+          Essayez de suivre du monde en cliquant sur la [
+          <i class="bi bi-bell-fill"></i> ]<br />
+          ou de jetter un oeil à <b>`@everyone`</b>!
+        </h3>
+      </div>
+
       <!-- On affiche toutes les publications -->
       <!-- on les filtres avant en utilisant les fonctions de filtrage -->
-
       <publication
         v-for="p in filtered_publications"
         :post-id="p.postId"
@@ -112,30 +128,47 @@
       >
         <div class="grid-sizer col-md-3"></div>
         <!-- Checkbox pour s'abonner -->
-        <template v-slot:subscribe>
+        <template v-slot:subscribe v-if="logged && p.clientId != user.u_id">
           <input
             type="checkbox"
             v-on:click="subscribe(p)"
             v-model="p.subscribed"
-            v-if="logged && p.clientId != user.u_id"
+            :id="'sub-' + p.postId"
             :disabled="!logged"
-            class="subscribed-check form-check-input"
+            class="subscribed-check form-check-input btn-check"
           />
+          <label
+            v-if="!user.subscribed.includes(p.clientId)"
+            :for="'sub-' + p.postId"
+            class="btn btn-outline-light m-1 subscribed-check"
+            ><i class="bi bi-bell-fill"></i
+          ></label>
+          <label
+            v-else
+            :for="'sub-' + p.postId"
+            class="btn btn-outline-light m-1 subscribed-check"
+            ><i class="bi bi-bell-slash-fill"></i
+          ></label>
         </template>
         <!-- Checkbox pour liker le post -->
         <template v-slot:like>
           <input
             type="checkbox"
+            :id="'like-' + p.postId"
             v-on:click="like_post(p)"
             v-if="logged"
             v-model="p.liked"
             :disabled="!logged"
-            class="form-check-input"
+            class="form-check-input btn-check"
+            autocomplete="off"
           />
+          <label :for="'like-' + p.postId" class="btn btn-outline-light m-1">
+            {{ p.likesCount }} <i class="bi bi-heart-fill"></i>
+          </label>
         </template>
         <template v-slot:answer>
           <button
-            class="btn btn-outline-light"
+            class="btn btn-outline-light m-1"
             v-if="logged"
             @click="answer(p.clientUsername)"
           >
@@ -288,8 +321,8 @@ export default {
                   liked: p.liked,
                   clientUsername: p.username,
                   clientId: p.id_client,
-                  mentions: p.mentions,
-                  hashtags: p.hashtags,
+                  mentions: this.get_mentions(p.content),
+                  hashtags: this.get_hashtags(p.content),
                   subscribed: self.user.subscribed.includes(p.id_client),
                 });
             }
@@ -298,6 +331,9 @@ export default {
               alertMessage(e, "ERROR");
             }
           }
+        })
+        .catch(function (error) {
+          console.log(error);
         });
     },
     // Permet d'envoyer un post a la BD
@@ -305,17 +341,12 @@ export default {
       let msg = this.messageBox;
       // Si le message est non vide
       if (msg.length > 0 && !(msg.trim() === "")) {
-        // On prépare l'envoie du message
-        let hashtags = this.get_hashtags(msg);
-        let mentions = this.get_mentions(msg);
         const requestOptions = {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
             user_id: this.user.u_id,
             message: msg,
-            hashtags: hashtags,
-            mentions: mentions,
           }),
         };
         // On l'envoie
@@ -329,6 +360,9 @@ export default {
                 alertMessage(e, "ERROR");
               }
             }
+          })
+          .catch(function (error) {
+            console.log(error);
           });
         this.messageBox = "";
       } else {
@@ -359,6 +393,9 @@ export default {
               alertMessage(e, "ERROR");
             }
           }
+        })
+        .catch(function (error) {
+          console.log(error);
         });
       if (like) post.likesCount++;
       else post.likesCount--;
@@ -385,8 +422,10 @@ export default {
               alertMessage(e, "ERROR");
             }
           }
+        })
+        .catch(function (error) {
+          console.log(error);
         });
-
       if (!sub)
         this.user.subscribed = this.user.subscribed.filter((e) => e !== id);
       else this.user.subscribed.push(id);
@@ -404,12 +443,14 @@ export default {
     // Retourne tout les hashtags d'un message
     get_hashtags: function (msg) {
       let reg = /(#[a-zA-Z]+)/g;
-      return msg.match(reg);
+      let val = msg.match(reg);
+      return val !== null ? val : [];
     },
     // Retourne toutes les mentions d'un message
     get_mentions: function (msg) {
       let reg = /(@[a-zA-Z]+)/g;
-      return msg.match(reg);
+      let val = msg.match(reg);
+      return val !== null ? val : [];
     },
     pub_click: function (hash, rule) {
       this.rules[rule].val = hash;
@@ -497,8 +538,8 @@ document.addEventListener("scroll", function () {
 <style>
 #skyrocket {
   position: fixed;
-  bottom: 0;
-  right: 0;
+  bottom: 50px;
+  right: 50px;
   opacity: 0;
   transition: opacity 0.2s;
   z-index: 1000;
@@ -507,12 +548,15 @@ document.addEventListener("scroll", function () {
   position: fixed;
   width: 1000px;
   left: 50%;
+  top: 25px;
   transform: translateX(-50%);
   text-align: center;
   z-index: 10;
+  opacity: 0.9;
 }
 #lateral-bar {
   position: fixed;
+  z-index: 5;
   height: 100vh;
   width: 250px;
 }
