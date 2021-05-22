@@ -66,7 +66,7 @@
           <div id="message-block" v-if="logged">
             <hr />
             <div>
-              <h3>Poste</h3>
+              <h3>Publication</h3>
             </div>
             <textarea
               class="form-control mb-3"
@@ -96,8 +96,11 @@
     <!-- Le feed contenant les publications -->
 
     <div id="feed" class="gridCentered">
+      <div id="yasm-title">
+        <h1>- Yet Another Social Media</h1>
+      </div>
       <!-- Si on a aucune publication à afficher -->
-      <transition name="list">
+      <transition name="empty">
         <div id="empty-feed" v-if="filtered_publications.length == 0">
           <h3>
             Votre feed est vide...<br />
@@ -107,7 +110,6 @@
           </h3>
         </div>
       </transition>
-
       <!-- On affiche toutes les publications -->
       <!-- on les filtres avant en utilisant les fonctions de filtrage -->
       <transition-group name="list">
@@ -391,7 +393,8 @@ export default {
         .then((res) => res.json())
         .then((res) => {
           if (res.worked) {
-            alertMessage("Action effectuée avec succès !", "SUCCESS");
+            // Trop lourd d'envoyer 'action effectuée' a chaque like
+            // alertMessage("Action effectuée avec succès !", "SUCCESS");
           } else {
             for (let e of res.errors) {
               alertMessage(e, "ERROR");
@@ -420,7 +423,8 @@ export default {
         .then((res) => res.json())
         .then((res) => {
           if (res.worked) {
-            alertMessage("Action effectuée avec succès !", "SUCCESS");
+            // Trop lourd d'envoyer 'action effectuée' a chaque abonnement
+            // alertMessage("Action effectuée avec succès !", "SUCCESS");
           } else {
             for (let e of res.errors) {
               alertMessage(e, "ERROR");
@@ -510,6 +514,9 @@ export default {
   // Lors du montage
   mounted: function () {
     let self = this;
+    // Si on est connecté, on change le titre de la page
+    if (this.user.username !== "")
+      document.title = "YASM @" + this.user.username;
     // On charge une fois les posts
     this.get_posts();
     // On recharge les messages tout les demi secondes
@@ -524,22 +531,30 @@ export default {
   },
 };
 
+// Evenements sur le scroll
 document.addEventListener("scroll", function () {
   var skyrocket = document.getElementById("skyrocket");
+  var yasm = document.getElementById("yasm-title");
 
   var st = window.pageYOffset || document.documentElement.scrollTop; // Credits: "https://github.com/qeremy/so/blob/master/so.dom.js#L426"
 
   // Quand on scroll en bas
   if (st == 0) {
     skyrocket.style.opacity = 0;
+    yasm.style.opacity = 1;
   } else {
     // En haut
     skyrocket.style.opacity = 1;
+    yasm.style.opacity = 0;
   }
 });
 </script>
 
 <style>
+@font-face {
+  font-family: "Akira";
+  src: url("../assets/fonts/akira.otf");
+}
 #skyrocket {
   position: fixed;
   bottom: 50px;
@@ -551,11 +566,30 @@ document.addEventListener("scroll", function () {
 #feed {
   position: relative;
 }
+#yasm-title {
+  position: sticky;
+  width: 100%;
+  top: 25px;
+  z-index: 2;
+  text-align: center;
+  font-family: "Akira";
+  margin: 25px;
+  transition: all 0.25s;
+}
 #empty-feed {
   position: absolute;
   top: 250px;
   left: 0;
   right: 0;
+}
+.empty-enter-active {
+  transition: opacity 1s ease-in-out;
+}
+.empty-leave-active {
+  transition: opacity 0.1s ease-in-out;
+}
+.empty-enter, .empty-leave-to /* .fade-leave-active below version 2.1.8 */ {
+  opacity: 0;
 }
 #alert-box {
   position: fixed;
@@ -616,7 +650,7 @@ document.addEventListener("scroll", function () {
 }
 
 .list-enter {
-  transform: translateX(250px);
+  transform: translateX(50px);
 }
 .list-leave-to {
   opacity: 0;
