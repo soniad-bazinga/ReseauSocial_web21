@@ -110,7 +110,8 @@ app.post('/login', async (req, res) => {
         if (e.rowCount <= 0) return res.json({ worked: false, errors: ["Aucun utilisateur ne correspond aux informations que vous nous avez fournis"] })
 
         let s = await (await client.query("SELECT id_to as id FROM subscriber WHERE id_from = $1;", [e.rows[0].id_client]));
-        return res.json({ worked: true, errors: [], result: { u_id: e.rows[0].id_client, username: e.rows[0].username, subscribed: s.rows.map((e) => e.id) } });
+        let i = await (await client.query("SELECT id_from as id FROM subscriber WHERE id_to = $1;", [e.rows[0].id_client]));
+        return res.json({ worked: true, errors: [], result: { u_id: e.rows[0].id_client, username: e.rows[0].username, subscribed: s.rows.map((e) => e.id), followers_nbr: i.rowCount } });
     } catch {
         return res.json({ worked: false, errors: [DEFAULT_ERROR_MSG] })
     }

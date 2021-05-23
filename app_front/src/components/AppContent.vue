@@ -11,7 +11,12 @@
       <div id="lateral-bar">
         <div id="lateral-bar-content">
           <!-- Bloc "compte" (infos sur le compte) -->
-          <account :logged="logged" :u_id="user.u_id" />
+          <account
+            :logged="logged"
+            :u_id="user.u_id"
+            :followingNbr="user.subscribed.length"
+            :followersNbr="user.followersNbr"
+          />
           <!-- Bloc pour les réglages -->
           <hr />
           <div id="settings-block">
@@ -218,6 +223,7 @@ export default {
         username: "",
         // Le tableau des comptes auquel l'utilisateur est abonné
         subscribed: [],
+        followersNbr: 0,
       },
       // Les inputs pour se connecter
       inputs: {
@@ -507,6 +513,7 @@ export default {
       this.user.u_id = this.$session.get("u_id");
       this.user.username = this.$session.get("username");
       this.user.subscribed = JSON.parse(this.$session.get("subscribed"));
+      this.user.followersNbr = this.$session.get("followers_nbr");
 
       this.logged = true;
     }

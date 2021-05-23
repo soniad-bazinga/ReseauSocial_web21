@@ -67,6 +67,11 @@
     <!-- Connecté : Bouton de deconnexion -->
     <div v-if="logged">
       <div id="profil-picture">
+        <div id="account-stats" class="col-12 mb-2">
+          <span>{{ followersNbr }} abonnés</span>
+          <span>&nbsp;|&nbsp;</span>
+          <span>{{ followingNbr }} abonnements</span>
+        </div>
         <button class="btn btn-outline-light col-12 mb-3" @click="showImgModal">
           Changer son avatar
         </button>
@@ -140,12 +145,16 @@ export default {
       imgModalVisibile: false,
       registerModalVisible: false,
       usernameModalVisible: false,
+      followersModalVisible: false,
+      followingModalVisible: false,
       image: null,
     };
   },
   props: {
     logged: Boolean,
     u_id: Number,
+    followingNbr: Number,
+    followersNbr: Number,
   },
   components: {
     Modal,
@@ -171,6 +180,7 @@ export default {
               "subscribed",
               JSON.stringify(res.result.subscribed)
             );
+            this.$session.set("followers_nbr", res.result.followers_nbr);
 
             // On refresh
             this.$router.go();
@@ -352,8 +362,6 @@ export default {
 };
 </script>
 
-
-
 <style>
 #register {
   text-decoration: underline;
@@ -362,5 +370,11 @@ export default {
 }
 #register-advert {
   color: white;
+}
+#account-stats {
+  font-size: 15.5px;
+}
+#account-stats .clickeable {
+  cursor: pointer;
 }
 </style>
