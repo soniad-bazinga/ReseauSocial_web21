@@ -1,7 +1,15 @@
 <template>
   <div id="account-block" class="account">
     <div>
-      <h3>Compte</h3>
+      <h3>
+        <img
+          v-if="logged"
+          :src="getImage"
+          alt="profil picture"
+          class="account-img"
+        />
+        {{ compteTitle }}
+      </h3>
     </div>
     <!-- Non connecté : on affiche le form de connexion -->
     <div id="unregistered-block" v-if="!logged">
@@ -155,6 +163,8 @@ export default {
     u_id: Number,
     followingNbr: Number,
     followersNbr: Number,
+    compteTitle: String,
+    imageUrl: String,
   },
   components: {
     Modal,
@@ -194,6 +204,7 @@ export default {
           console.log(error);
         });
     },
+
     // Pour se deconnecter
     logout: function () {
       // On vide le storage et on refresh
@@ -359,6 +370,15 @@ export default {
         });
     },
   },
+  computed: {
+    getImage() {
+      try {
+        return require("@/assets/profil_pictures/" + this.imageUrl);
+      } catch {
+        return require("@/assets/profil_pictures/default_picture.png");
+      }
+    },
+  },
 };
 </script>
 
@@ -376,5 +396,13 @@ export default {
 }
 #account-stats .clickeable {
   cursor: pointer;
+}
+.account-img {
+  display: inline-block;
+  margin: 5px;
+  width: 40px;
+  height: 40px;
+  border-radius: 100%;
+  border: 3px solid white;
 }
 </style>

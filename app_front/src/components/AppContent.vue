@@ -16,6 +16,8 @@
             :u_id="user.u_id"
             :followingNbr="user.subscribed.length"
             :followersNbr="user.followersNbr"
+            :compteTitle="logged ? '@' + user.username : 'Connexion'"
+            :image-url="user.u_id + '.png'"
           />
           <!-- Bloc pour les réglages -->
           <hr />
@@ -117,76 +119,82 @@
       </transition>
       <!-- On affiche toutes les publications -->
       <!-- on les filtres avant en utilisant les fonctions de filtrage -->
-      <transition-group name="list">
-        <publication
-          v-for="p in filtered_publications"
-          :post-id="p.postId"
-          :client-username="p.clientUsername"
-          :client-id="p.clientId"
-          :date-publication="p.datePublication"
-          :post-content="p.postContent"
-          :likes-count="p.likesCount"
-          :likes-infos="p.likes"
-          :image-url="p.clientId + '.png'"
-          :mentions="p.mentions"
-          :hashtags="p.hashtags"
-          :pub-click="pub_click"
-          :key="p.postId"
-          :id="p.postId"
-          class="publication"
-          style="margin-top: 20px"
-        >
-          <div class="grid-sizer col-md-3"></div>
-          <!-- Checkbox pour s'abonner -->
-          <template v-slot:subscribe v-if="logged && p.clientId != user.u_id">
-            <input
-              type="checkbox"
-              v-on:click="subscribe(p)"
-              v-model="p.subscribed"
-              :id="'sub-' + p.postId"
-              :disabled="!logged"
-              class="subscribed-check form-check-input btn-check"
-            />
-            <label
-              v-if="!user.subscribed.includes(p.clientId)"
-              :for="'sub-' + p.postId"
-              class="btn btn-outline-light m-1 subscribed-check"
-              ><i class="bi bi-bell-fill"></i
-            ></label>
-            <label
-              v-else
-              :for="'sub-' + p.postId"
-              class="btn btn-outline-light m-1 subscribed-check"
-              ><i class="bi bi-bell-slash-fill"></i
-            ></label>
-          </template>
-          <!-- Checkbox pour liker le post -->
-          <template v-slot:like>
-            <input
-              type="checkbox"
-              :id="'like-' + p.postId"
-              v-on:click="like_post(p)"
-              v-if="logged"
-              v-model="p.liked"
-              :disabled="!logged"
-              class="form-check-input btn-check"
-              autocomplete="off"
-            />
-            <label :for="'like-' + p.postId" class="btn btn-outline-light m-1">
-              {{ p.likesCount }} <i class="bi bi-heart-fill"></i>
-            </label>
-          </template>
-          <template v-slot:answer>
-            <button
-              class="btn btn-outline-light m-1"
-              v-if="logged"
-              @click="answer(p.clientUsername)"
-            >
-              Répondre
-            </button>
-          </template>
-        </publication>
-      </transition-group>
+      <div id="feed-container">
+        <transition-group name="list">
+          <publication
+            v-for="p in filtered_publications"
+            :post-id="p.postId"
+            :client-username="p.clientUsername"
+            :client-id="p.clientId"
+            :date-publication="p.datePublication"
+            :post-content="p.postContent"
+            :likes-count="p.likesCount"
+            :likes-infos="p.likes"
+            :image-url="p.clientId + '.png'"
+            :mentions="p.mentions"
+            :hashtags="p.hashtags"
+            :pub-click="pub_click"
+            :key="p.postId"
+            :id="p.postId"
+            class="publication"
+            style="margin-top: 20px"
+          >
+            <div class="grid-sizer col-md-3"></div>
+            <!-- Checkbox pour s'abonner -->
+            <template v-slot:subscribe v-if="logged && p.clientId != user.u_id">
+              <input
+                type="checkbox"
+                v-on:click="subscribe(p)"
+                v-model="p.subscribed"
+                :id="'sub-' + p.postId"
+                :disabled="!logged"
+                class="subscribed-check form-check-input btn-check"
+              />
+              <label
+                v-if="!user.subscribed.includes(p.clientId)"
+                :for="'sub-' + p.postId"
+                class="btn btn-outline-light m-1 subscribed-check"
+                ><i class="bi bi-bell-fill"></i
+              ></label>
+              <label
+                v-else
+                :for="'sub-' + p.postId"
+                class="btn btn-outline-light m-1 subscribed-check"
+                ><i class="bi bi-bell-slash-fill"></i
+              ></label>
+            </template>
+            <!-- Checkbox pour liker le post -->
+            <template v-slot:like>
+              <input
+                type="checkbox"
+                :id="'like-' + p.postId"
+                v-on:click="like_post(p)"
+                v-if="logged"
+                v-model="p.liked"
+                :disabled="!logged"
+                class="form-check-input btn-check"
+                autocomplete="off"
+              />
+              <label
+                :for="'like-' + p.postId"
+                class="btn btn-outline-light m-1"
+              >
+                {{ p.likesCount }}
+                <i class="bi bi-heart-fill"></i>
+              </label>
+            </template>
+            <template v-slot:answer>
+              <button
+                class="btn btn-outline-light m-1"
+                v-if="logged"
+                @click="answer(p.clientUsername)"
+              >
+                Répondre
+              </button>
+            </template>
+          </publication>
+        </transition-group>
+      </div>
     </div>
   </div>
 </template>
@@ -564,6 +572,7 @@ document.addEventListener("scroll", function () {
 }
 #skyrocket {
   position: fixed;
+  display: block;
   bottom: 50px;
   right: 50px;
   opacity: 0;
@@ -572,15 +581,24 @@ document.addEventListener("scroll", function () {
 }
 #feed {
   position: relative;
+  margin-left: auto;
+  margin-right: auto;
+}
+#feed-container {
+  max-width: 1150px;
+  margin-left: auto;
+  margin-right: auto;
 }
 #yasm-title {
   position: sticky;
-  width: 100%;
+  width: 80%;
   top: 25px;
   z-index: 2;
   text-align: center;
   font-family: "Akira";
   margin: 25px;
+  margin-left: auto;
+  margin-right: auto;
   transition: all 0.25s;
 }
 #empty-feed {
@@ -606,7 +624,7 @@ document.addEventListener("scroll", function () {
   transform: translateX(-50%);
   text-align: center;
   z-index: 10;
-  opacity: 0.9;
+  opacity: 1;
 }
 #lateral-bar {
   position: fixed;
@@ -639,6 +657,7 @@ document.addEventListener("scroll", function () {
   height: fit-content;
   margin-left: auto;
   margin-right: auto;
+  box-shadow: 0px 0px 10px 1px rgba(0, 0, 0, 0.1);
 }
 
 .gridCentered {
@@ -669,7 +688,7 @@ document.addEventListener("scroll", function () {
 
 @media (min-width: 0px) and(max-width: 755px) {
   .gridCentered {
-    width: 504px;
+    width: 500px;
   }
 }
 </style>

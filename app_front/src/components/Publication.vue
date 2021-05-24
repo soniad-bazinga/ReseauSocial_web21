@@ -1,19 +1,34 @@
 <template>
-  <div class="publication-post">
-    <div class="img-container">
-      <img :src="getImage" class="post-img" alt="profil picture" />
-    </div>
-    <div class="publication-content">
-      <slot name="subscribe" />
-      <p class="publication-text">
-        <span class="publication-header"
-          ><span class="at">@{{ clientUsername }}</span> le {{ printDate }}
-        </span>
-        <span v-html="hashText" class="publication-body mb-2"></span>
-      </p>
-      <div class="publication-footer">
-        <slot name="like" />
-        <slot name="answer" />
+  <div class="post-container">
+    <modal class="pp-modal" v-show="ppModalVisible" @close="closePpModal">
+      <template v-slot:body>
+        <img :src="getImage" alt="profil picture" class="post-img-zoom" />
+      </template>
+    </modal>
+    <div class="publication-post">
+      <div class="img-container">
+        <img :src="getImage" class="post-img" alt="profil picture" />
+      </div>
+      <div class="publication-content">
+        <slot name="subscribe" />
+        <p class="publication-text">
+          <span class="publication-header">
+            <button class="img-button" @click="showPpModal">
+              <img :src="getImage" alt="profil picture" class="post-img-min" />
+            </button>
+            <span class="at">@{{ clientUsername }} </span>
+            le {{ printDate }}
+          </span>
+        </p>
+        <hr style="color: white" />
+        <span
+          v-html="hashText"
+          class="publication-body publication-text mb-4"
+        ></span>
+        <div class="publication-footer">
+          <slot name="like" />
+          <slot name="answer" />
+        </div>
       </div>
     </div>
   </div>
@@ -21,11 +36,17 @@
     
 <script>
 import marked from "marked";
+import Modal from "./Modal.vue";
 
 export default {
   name: "Publication",
   data: function () {
-    return {};
+    return {
+      ppModalVisible: false,
+    };
+  },
+  components: {
+    Modal,
   },
   props: {
     "date-publication": Date,
@@ -41,15 +62,24 @@ export default {
     hashtags: Array,
     liked: Boolean,
   },
+  methods: {
+    closePpModal() {
+      this.ppModalVisible = false;
+    },
+    showPpModal() {
+      this.ppModalVisible = true;
+    },
+  },
   computed: {
     hashText: function () {
       if (!this.postContent) return "";
       let hashReg = /#\w+/gm;
       let atReg = /@\w+/gm;
-      let hashed = this.postContent
-        .replace(hashReg, "<span class = 'hashtag'>$&</span>")
-        .replace(atReg, "<span class = 'at'>$&</span>");
-      return marked("<span>“</span>" + hashed + "<span>”</span>");
+      return marked(
+        this.postContent
+          .replace(hashReg, "<span class = 'hashtag'>$&</span>")
+          .replace(atReg, "<span class = 'at'>$&</span>")
+      );
     },
     getImage() {
       try {
@@ -102,12 +132,18 @@ export default {
 .at {
   color: violet !important;
 }
+.post-container {
+}
 .publication-post {
   position: relative;
   padding: 10px;
   z-index: 0;
   box-shadow: 10px 10px 0px 3px rgb(124, 149, 196);
   margin-bottom: 30px;
+  max-width: 80%;
+  min-width: 80%;
+  margin-left: auto;
+  margin-right: auto;
 }
 .img-container {
   position: absolute;
@@ -133,6 +169,9 @@ export default {
 }
 .publication-body {
   display: block;
+  padding-left: 10px;
+  padding-right: 10px;
+  overflow-wrap: break-word;
 }
 .publication-content {
   display: block;
@@ -148,6 +187,27 @@ export default {
 }
 .publication-text * {
   color: white;
+  text-overflow: clip;
+}
+.pp-modal .modal-content {
+  opacity: 95%;
+}
+.post-img-zoom {
+  width: 300px;
+  height: 300px;
+  object-fit: cover;
+  border-radius: 100%;
+}
+.img-button {
+  background-color: transparent;
+  color: white;
+  border: none;
+}
+.post-img-min {
+  width: 35px;
+  height: 35px;
+  border-radius: 100%;
+  border: 2px solid white;
 }
 p {
   display: inline;

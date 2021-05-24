@@ -96,6 +96,12 @@ ul ul a {
   #sidebar.active {
     margin-left: 0;
   }
+  #skyrocket {
+    display: none;
+  }
+  #expendable {
+    display: none;
+  }
 }
 </style>
 

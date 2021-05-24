@@ -14,7 +14,7 @@ function alertMessage(mess, code) {
     alertBox.append('<p>' + mess + '</p>');
 
     $('#alert-box').append(alertBox);
-    alertBox.delay(5000).fadeOut(1000, function () {
+    alertBox.delay(3000).fadeOut(1000, function () {
         alertBox.remove();
     })
 }
