@@ -1,5 +1,9 @@
 # YASM
-> (Yet Another Social Media)
+*(Yet Another Social Media)*
+
+### Membres
+> Sonia DAHMANI 21965528  
+Eugène VALTY 71805512
 
 ### Initialisation
 * Pour initaliser la base de données, executer le script `create_database.sh`
