@@ -13,4 +13,4 @@ Eugène VALTY 71805512
 * Le site tourne sur le port `8080`.
 * Les couples comptes / mot de passe sont disponbile dans `data/user.csv`.  
 Vous pouvez par exemple utiliser l'utilisateur suivant : `[user : yuyujijin; mdp : 1234]`
-* Le site ne possède qu'une unique page, accessible via n'importe quelle route
+* Le site ne possède qu'une unique page, accessible via n'importe quelle route# ReseauSocial_web21
